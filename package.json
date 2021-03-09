@@ -1,6 +1,6 @@
 {
   "name": "tp_tool",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "tool assets",
   "bin": {
     "tp_shimo_json": "node ./dist/shimo/ShimoCmd.js",
