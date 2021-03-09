@@ -99,7 +99,7 @@ keyWords.forEach(v=>collisionMap[v] = 1);
 
 
 var output = falafel(content,{ecmaVersion:6} , function (node) {
-    console.log(node.type, node.source());
+    // console.log(node.type, node.source());
     if (node.type == "Identifier") {
         // console.log(node.source(), node.name)
         var name: string = node.name;
