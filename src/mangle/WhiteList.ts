@@ -1,3 +1,7 @@
 export let whiteList = [
-    "require"
+    "require",
+    "configurable",
+    "writable",
+    ""
+
 ]

@@ -3,8 +3,8 @@
   "version": "1.0.4",
   "description": "tool assets",
   "bin": {
-    "tp_shimo_json": "node ./dist/shimo/ShimoCmd.js",
-    "tp_mangle": "node ./dist/mangle/MangleCmd.js"
+    "tp_shimo_json": "./dist/shimo/ShimoCmd.js",
+    "tp_mangle": "./dist/mangle/MangleCmd.js"
   },
   "files": [
     "dist"

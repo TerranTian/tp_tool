@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 
 import * as path from "path";
 import * as fs from "fs";
@@ -69,29 +70,44 @@ var falafel = require('falafel');
 let nameMap = nameCacheMap;
 let value = 0;
 let content: string = FileUtil.readString(input);
-content = content.replace(/\[["'](\w+)["']\]/g, (str, name) => {
-    return "." + name;
-})
+// content = content.replace(/\[["'](\w+)["']\]/g, (str, name) => {
+//     return "." + name;
+// })
 
 let collisionMap = {};
-falafel(content, function (node) {
+falafel(content,{ecmaVersion:6} ,function (node) {
     if (node.type == "Identifier") {
         collisionMap[node.name] = 1;
+    }else if(node.type == "Literal"){
+        let v = node.source();
+        if(v[0] == '"'){
+            v= v.substr(1,v.length-2);//rm "
+            whiteMap[v] = 1;
+            console.log("add",v,v.length);
+        }
     }
 })
 for (let key in nameMap) {
     collisionMap[nameMap[key]] = 1;
 }
+
+let keyWords=[
+    "if","while","for","else","let","var","const","function","class","number","boolean","NaN","void","undifined","string","break","default","return","case","call","apply","switch","do","of","in","continue","true","false"
+]
+keyWords.forEach(v=>collisionMap[v] = 1);
 // Object.assign(collisionMap,nameMap)
 
 
-var output = falafel(content, function (node) {
-    // console.log(node.type, node.source());
+var output = falafel(content,{ecmaVersion:6} , function (node) {
+    console.log(node.type, node.source());
     if (node.type == "Identifier") {
         // console.log(node.source(), node.name)
         var name: string = node.name;
         if (dropMap[name]) return;
-        if (whiteMap[name]) return;
+        if (whiteMap[name]){
+            console.log("white",name);
+            return;
+        };
 
         if (resolved[name]) return;
         if (name.length <= 2) return;
