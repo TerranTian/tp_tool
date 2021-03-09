@@ -1,0 +1,30 @@
+{
+  "name": "tp_tool",
+  "version": "1.0.1",
+  "description": "tool assets",
+  "bin": {
+    "tp_shimo_json": "node ./dist/shimo/ShimoCmd.js",
+    "tp_mangle": "node ./dist/mangle/MangleCmd.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "index": "./dist/Main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./dist/Main.js",
+    "build": "rm -rf dist && tsc",
+    "prepublishOnly": "npm version patch && npm run build",
+    "postpublish": "git push"
+  },
+  "author": "terran.tian",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^9.3.0",
+    "axios": "^0.19.0",
+    "download": "^7.1.0",
+    "falafel": "^2.2.4",
+    "node-xlsx": "^0.15.0",
+    "request": "^2.88.0"
+  }
+}
