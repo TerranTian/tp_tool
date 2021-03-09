@@ -66,10 +66,12 @@ if (!input) {
 
 var falafel = require('falafel');
 
-
 let nameMap = nameCacheMap;
 let value = 0;
-let content = FileUtil.readString(input);
+let content: string = FileUtil.readString(input);
+content = content.replace(/\[["'](\w+)["']\]/g, (str, name) => {
+    return "." + name;
+})
 
 let collisionMap = {};
 falafel(content, function (node) {
@@ -77,8 +79,14 @@ falafel(content, function (node) {
         collisionMap[node.name] = 1;
     }
 })
+for (let key in nameMap) {
+    collisionMap[nameMap[key]] = 1;
+}
+// Object.assign(collisionMap,nameMap)
+
 
 var output = falafel(content, function (node) {
+    // console.log(node.type, node.source());
     if (node.type == "Identifier") {
         // console.log(node.source(), node.name)
         var name: string = node.name;
@@ -86,7 +94,7 @@ var output = falafel(content, function (node) {
         if (whiteMap[name]) return;
 
         if (resolved[name]) return;
-        if (name.length < 2) return;
+        if (name.length <= 2) return;
 
         if (!regex || new RegExp(regex).test(name)) {
             let newName = nameMap[name];

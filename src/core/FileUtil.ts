@@ -1,5 +1,6 @@
-let path = require("path");
-let fs = require("fs");
+
+import * as path from "path";
+import * as fs from "fs";
 
 export namespace FileUtil {
     export function mkdir(dir, mode = 777) {
