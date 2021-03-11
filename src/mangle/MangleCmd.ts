@@ -25,9 +25,9 @@ let nameCache: string = null;
 
 
 let cache_data = {
-    nameCacheMap:{},
-    collisionMap:{},
-    literalMap:{}
+    nameCacheMap: {},
+    collisionMap: {},
+    literalMap: {}
 };
 
 while (parameters.length > 0) {
@@ -53,8 +53,8 @@ while (parameters.length > 0) {
         case "--nameCache":
             nameCache = parameters.shift();
             nameCache && (
-                Object.assign(cache_data,JSON.parse(FileUtil.readString(nameCache)))
-                );
+                Object.assign(cache_data, JSON.parse(FileUtil.readString(nameCache)))
+            );
             break
         default:
             inputs.push(value);
@@ -87,54 +87,55 @@ for (let key in nameMap) {
     collisionMap[nameMap[key]] = 1;
 }
 
-let keyWords=[
-    "if","while","for","else","let","var","const","function","class","number","boolean","NaN","void","undifined","string","break","default","return","case","call","apply","switch","do","of","in","continue","true","false"
+let keyWords = [
+    "if", "while", "for", "else", "let", "var", "const", "function", "class", "number", "boolean", "NaN", "void", "undifined", "string", "break", "default", "return", "case", "call", "apply", "switch", "do", "of", "in", "continue", "true", "false"
 ]
-keyWords.forEach(v=>collisionMap[v] = 1);
+keyWords.forEach(v => collisionMap[v] = 1);
 
 let value = 0;
 
-function canUse(name){
-    if(collisionMap[name]) return false;
-    if(dropMap[name]) return false;
-    if(whiteMap[name]) return false;
-    if(literalMap[name]) return false;
+function canUse(name) {
+    if (collisionMap[name]) return false;
+    if (dropMap[name]) return false;
+    if (whiteMap[name]) return false;
+    if (literalMap[name]) return false;
 
     return true;
 }
 
-inputs.forEach((input,index)=>{
+inputs.forEach((input, index) => {
     let content: string = FileUtil.readString(input);
-    falafel(content,{ecmaVersion:6} ,function (node) {
+    falafel(content, { ecmaVersion: 6 }, function (node) {
+        console.log(node.type, node.source());
         if (node.type == "Identifier") {
             collisionMap[node.name] = 1;
-        }else if(node.type == "Literal"){
-            let v:string = node.source();
-            if(v[0] == '"'){
-                v= v.substr(1,v.length-2);//rm "
+        } else if (node.type == "Literal") {
+            let v: string = node.source();
+            if (v[0] == '"') {
+                v = v.substr(1, v.length - 2);//rm "
                 literalMap[v] = 1;
-                v.replace(/\w+/ig,(w) => {
-                        literalMap[w] = 1;
-                        return w;
-                    });
+                v.replace(/\w+/ig, (w) => {
+                    literalMap[w] = 1;
+                    return w;
+                });
             }
         }
     })
 });
-inputs.forEach((input,index)=>{
+console.log("literalMap:", JSON.stringify(literalMap, null, 4))
+inputs.forEach((input, index) => {
     let content: string = FileUtil.readString(input);
-    var output = falafel(content,{ecmaVersion:6} , function (node) {
+    var output = falafel(content, { ecmaVersion: 6 }, function (node) {
         // console.log(node.type, node.source());
         if (node.type == "Identifier") {
-            // console.log(node.source(), node.name)
             var name: string = node.name;
             if (dropMap[name]) return;
-            if (whiteMap[name])return;
-            if(literalMap[name])return;
-    
+            if (whiteMap[name]) return;
+            if (literalMap[name]) return;
+
             if (resolved[name]) return;
             if (name.length <= 2) return;
-    
+
             if (!regex || new RegExp(regex).test(name)) {
                 let newName = nameMap[name];
                 if (!newName) {
@@ -144,12 +145,11 @@ inputs.forEach((input,index)=>{
                     }
                     nameMap[name] = newName;
                 }
-    
                 node.update(newName);
             }
         }
     });
-    FileUtil.writeString(index==0?out:input, output);
+    FileUtil.writeString(index == 0 ? out : input, output);
 })
 
 nameCache && (FileUtil.writeString(nameCache, JSON.stringify(cache_data)));
