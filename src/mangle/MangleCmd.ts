@@ -23,11 +23,14 @@ let regex: string = null;
 let resolved: { [key: string]: number } = {};
 let nameCache: string = null;
 
+let dts:string[] = [];
+
 
 let cache_data = {
     nameCacheMap: {},
     collisionMap: {},
-    literalMap: {}
+    literalMap: {},
+    dtsMap:{}
 };
 
 while (parameters.length > 0) {
@@ -56,6 +59,9 @@ while (parameters.length > 0) {
                 Object.assign(cache_data, JSON.parse(FileUtil.readString(nameCache)))
             );
             break
+        case "--dts":
+            dts = parameters.shift().split(",");
+            break
         default:
             inputs.push(value);
             break;
@@ -71,34 +77,50 @@ if (inputs.length == 0) {
     --regex: [option] Only mangle matched property names
     --resolved: [option] Only mangle matched property names: _bar,_foor
     --nameCache: File to hold mangled name mappings
+    --dts: d.ts files, auto resolve keyword in d.ts: a.d.ts,b.d.ts
     -o/--out: [option] out path
 `
     console.log(message);
     exit(1);
 }
 
+
 var falafel = require('falafel');
 
 let nameMap = cache_data.nameCacheMap;
-let collisionMap = cache_data.collisionMap;
 let literalMap = cache_data.literalMap;
+let collisionMap = cache_data.collisionMap
+let dtsMap = cache_data.dtsMap;
+dts.forEach(v=>{
+    let content = FileUtil.readString(v);
+    content.replace(/[a-zA-Z0-9_$]+/ig, (w) => {
+        dtsMap[w] = 1;
+        return w;
+    });
+})
 
+let usedMap = {};
 for (let key in nameMap) {
-    collisionMap[nameMap[key]] = 1;
+    usedMap[nameMap[key]] = 1;
 }
 
+let keyWordsMap = {};
 let keyWords = [
     "if", "while", "for", "else", "let", "var", "const", "function", "class", "number", "boolean", "NaN", "void", "undifined", "string", "break", "default", "return", "case", "call", "apply", "switch", "do", "of", "in", "continue", "true", "false"
 ]
-keyWords.forEach(v => collisionMap[v] = 1);
+keyWords.forEach(v => keyWordsMap[v] = 1);
 
 let value = 0;
 
 function canUse(name) {
-    if (collisionMap[name]) return false;
+    if (keyWordsMap[name]) return false;
     if (dropMap[name]) return false;
     if (whiteMap[name]) return false;
     if (literalMap[name]) return false;
+    if (usedMap[name]) return false;
+    if (collisionMap[name]) return false;
+    if (dtsMap[name]) return false;
+    if (resolved[name]) return false;
 
     return true;
 }
@@ -111,7 +133,7 @@ inputs.forEach((input, index) => {
         } else if (node.type == "Literal") {
             // console.log(node.type, node.source());
             let v: string = node.source();
-            if (v[0] == '"') {
+            if (v[0] == '"' || v[0] == "'") {
 
                 // v = v.substr(1, v.length - 2);//rm "
                 // literalMap[v] = 1;
@@ -123,7 +145,7 @@ inputs.forEach((input, index) => {
         }
     })
 });
-console.log("literalMap:", JSON.stringify(literalMap, null, 4))
+// console.log("literalMap:", JSON.stringify(literalMap, null, 4))
 inputs.forEach((input, index) => {
     let content: string = FileUtil.readString(input);
     var output = falafel(content, { ecmaVersion: 6 }, function (node) {
@@ -133,6 +155,7 @@ inputs.forEach((input, index) => {
             if (dropMap[name]) return;
             if (whiteMap[name]) return;
             if (literalMap[name]) return;
+            if (dtsMap[name]) return;
 
             if (resolved[name]) return;
             if (name.length <= 2) return;
