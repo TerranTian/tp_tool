@@ -106,14 +106,14 @@ function canUse(name) {
 inputs.forEach((input, index) => {
     let content: string = FileUtil.readString(input);
     falafel(content, { ecmaVersion: 6 }, function (node) {
-        console.log(node.type, node.source());
         if (node.type == "Identifier") {
             collisionMap[node.name] = 1;
         } else if (node.type == "Literal") {
+            console.log(node.type, node.source());
             let v: string = node.source();
             if (v[0] == '"') {
-                v = v.substr(1, v.length - 2);//rm "
-                literalMap[v] = 1;
+                // v = v.substr(1, v.length - 2);//rm "
+                // literalMap[v] = 1;
                 v.replace(/\w+/ig, (w) => {
                     literalMap[w] = 1;
                     return w;
