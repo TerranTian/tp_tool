@@ -109,12 +109,13 @@ inputs.forEach((input, index) => {
         if (node.type == "Identifier") {
             collisionMap[node.name] = 1;
         } else if (node.type == "Literal") {
-            console.log(node.type, node.source());
+            // console.log(node.type, node.source());
             let v: string = node.source();
             if (v[0] == '"') {
+
                 // v = v.substr(1, v.length - 2);//rm "
                 // literalMap[v] = 1;
-                v.replace(/\w+/ig, (w) => {
+                v.replace(/[a-zA-Z0-9_$]+/ig, (w) => {
                     literalMap[w] = 1;
                     return w;
                 });
