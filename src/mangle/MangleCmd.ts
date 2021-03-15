@@ -91,13 +91,21 @@ let nameMap = cache_data.nameCacheMap;
 let literalMap = cache_data.literalMap;
 let collisionMap = cache_data.collisionMap
 let dtsMap = cache_data.dtsMap;
-dts.forEach(v=>{
+
+for(let i = 0;i<dts.length;i++){
+    let v= dts[i];
+    if(fs.existsSync(v) && fs.lstatSync(v).isDirectory()){
+        let items = FileUtil.getFilesSync(v);
+        dts.concat(items);
+        continue
+    }
+    
     let content = FileUtil.readString(v);
     content.replace(/[a-zA-Z0-9_$]+/ig, (w) => {
         dtsMap[w] = 1;
         return w;
     });
-})
+}
 
 let usedMap = {};
 for (let key in nameMap) {
@@ -106,7 +114,7 @@ for (let key in nameMap) {
 
 let keyWordsMap = {};
 let keyWords = [
-    "if", "while", "for", "else", "let", "var", "const", "function", "class", "number", "boolean", "NaN", "void", "undifined", "string", "break", "default", "return", "case", "call", "apply", "switch", "do", "of", "in", "continue", "true", "false"
+    "if", "while", "for", "else", "let", "var", "const", "function", "class", "number", "boolean", "NaN", "void", "undifined", "string", "break", "default", "return", "case", "call", "apply", "switch", "do", "of", "in", "continue", "true", "false","Context"
 ]
 keyWords.forEach(v => keyWordsMap[v] = 1);
 

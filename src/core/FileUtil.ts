@@ -14,7 +14,7 @@ export namespace FileUtil {
         }
     }
 
-    export function getFilesSync(p, filter) {
+    export function getFilesSync(p, filter?) {
         let result = [];
         let arr = [p];
         for (let i = 0; i < arr.length; i++) {
