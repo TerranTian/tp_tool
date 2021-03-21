@@ -94,12 +94,15 @@ let dtsMap = cache_data.dtsMap;
 
 for(let i = 0;i<dts.length;i++){
     let v= dts[i];
-    if(fs.existsSync(v) && fs.lstatSync(v).isDirectory()){
+    if(!fs.existsSync(v)) continue;
+
+    if(fs.lstatSync(v).isDirectory()){
         let items = FileUtil.getFilesSync(v);
-        dts.concat(items);
+        console.log("dir:",v,items.length);
+        dts.push(...items);
         continue
     }
-    
+    console.log("dts:",v);
     let content = FileUtil.readString(v);
     content.replace(/[a-zA-Z0-9_$]+/ig, (w) => {
         dtsMap[w] = 1;
@@ -185,3 +188,4 @@ inputs.forEach((input, index) => {
 })
 
 nameCache && (FileUtil.writeString(nameCache, JSON.stringify(cache_data)));
+console.log("Mangle done");
